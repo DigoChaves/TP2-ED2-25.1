@@ -38,16 +38,16 @@ void constroi_heap(Aluno *H, int n) {
 // --- MÉTODO 2 ---
 
 void intercalacao_balanceada_substituicao(int quantidade, int situacao, int print_flag) {
-    FILE *arq_bin = fopen("dados.dat", "rb");
+    FILE *arq_bin = fopen("dados.bin", "rb");
     if (!arq_bin) {
-        printf("Erro ao abrir dados.dat no Metodo 2.\n");
+        printf("Erro ao abrir dados.bin no Metodo 2.\n");
         return;
     }
 
     if (print_flag) {
         printf("\n--- REGISTOS ANTES DA ORDENACAO ---\n");
         Aluno a;
-        for (int i = 0; i < (quantidade > 10 ? 10 : quantidade); i++) {
+        for (int i = 0; i < (quantidade > 100 ? 100 : quantidade); i++) {
             if (fread(&a, sizeof(Aluno), 1, arq_bin) == 1) {
                 printf("Inscricao: %08ld | Nota: %5.1f\n", a.inscricao, a.nota);
             }
@@ -67,7 +67,7 @@ void intercalacao_balanceada_substituicao(int quantidade, int situacao, int prin
     char nome[20];
     
     for (int i = 0; i < 20; i++) {
-        sprintf(nome, "fita_%d.dat", i);
+        sprintf(nome, "fita_%d.bin", i);
         fitas[i] = fopen(nome, "wb");
     }
 
@@ -166,10 +166,10 @@ void intercalacao_balanceada_substituicao(int quantidade, int situacao, int prin
         int out_offset = (direcao == 0) ? 20 : 0;
 
         for (int i = 0; i < 20; i++) {
-            sprintf(nome, "fita_%d.dat", i + in_offset);
+            sprintf(nome, "fita_%d.bin", i + in_offset);
             fitas[i + in_offset] = fopen(nome, "rb");
 
-            sprintf(nome, "fita_%d.dat", i + out_offset);
+            sprintf(nome, "fita_%d.bin", i + out_offset);
             fitas[i + out_offset] = fopen(nome, "wb");
         }
 
@@ -249,7 +249,7 @@ void intercalacao_balanceada_substituicao(int quantidade, int situacao, int prin
     // --- IMPRESSÃO DO RESULTADO FINAL ---
     if (print_flag) {
         int arquivo_final = (num_blocos <= 1 && direcao == 0) ? 0 : ((1 - direcao) == 0 ? 20 : 0);
-        sprintf(nome, "fita_%d.dat", arquivo_final);
+        sprintf(nome, "fita_%d.bin", arquivo_final);
         
         FILE *arq_final = fopen(nome, "rb");
         if (arq_final) {
@@ -257,7 +257,7 @@ void intercalacao_balanceada_substituicao(int quantidade, int situacao, int prin
             Aluno a;
             int contador = 0;
             // Lê ignorando sentinelas (embora o ficheiro final seja apenas um bloco gigante)
-            while (fread(&a, sizeof(Aluno), 1, arq_final) == 1 && contador < (quantidade > 10 ? 10 : quantidade)) {
+            while (fread(&a, sizeof(Aluno), 1, arq_final) == 1 && contador < (quantidade > 100 ? 100 : quantidade)) {
                 if (a.inscricao != -1) {
                     printf("Inscricao: %08ld | Nota: %5.1f\n", a.inscricao, a.nota);
                     contador++;
