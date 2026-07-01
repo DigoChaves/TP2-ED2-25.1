@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
     int situacao = atoi(argv[3]);
     int print_flag = (argc == 5 && strcmp(argv[4], "-P") == 0) ? 1 : 0;
 
-    // 1. Gera o arquivo dados.dat com a quantidade e situação desejada
+    // 1. Gera o arquivo dados.bin com a quantidade e situação desejada
     printf("Preparando arquivo de trabalho...\n");
     gerar_arquivo_trabalho(quantidade, situacao);
 
