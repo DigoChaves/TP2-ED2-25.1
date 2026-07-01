@@ -14,9 +14,9 @@ int comparar_alunos_metodo1(const void *a, const void *b) {
 }
 
 void intercalacao_balanceada_interna(int quantidade, int situacao, int print_flag) {
-    FILE *arq_bin = fopen("dados.dat", "rb");
+    FILE *arq_bin = fopen("dados.bin", "rb");
     if (!arq_bin) {
-        printf("Erro ao abrir dados.dat no Metodo 1.\n");
+        printf("Erro ao abrir dados.bin no Metodo 1.\n");
         return;
     }
 
@@ -24,7 +24,7 @@ void intercalacao_balanceada_interna(int quantidade, int situacao, int print_fla
     if (print_flag) {
         printf("\n--- REGISTOS ANTES DA ORDENACAO ---\n");
         Aluno a;
-        for (int i = 0; i < (quantidade > 10 ? 10 : quantidade); i++) {
+        for (int i = 0; i < (quantidade > 100 ? 100 : quantidade); i++) {
             if (fread(&a, sizeof(Aluno), 1, arq_bin) == 1) {
                 printf("Inscricao: %08ld | Nota: %5.1f\n", a.inscricao, a.nota);
             }
@@ -46,7 +46,7 @@ void intercalacao_balanceada_interna(int quantidade, int situacao, int print_fla
     
     // Abre as 20 primeiras fitas para gravar os blocos iniciais
     for (int i = 0; i < 20; i++) {
-        sprintf(nome, "fita_%d.dat", i);
+        sprintf(nome, "fita_%d.bin", i);
         fitas[i] = fopen(nome, "wb");
     }
 
@@ -101,10 +101,10 @@ void intercalacao_balanceada_interna(int quantidade, int situacao, int print_fla
 
         // Abre fitas de entrada (leitura) e saída (escrita) para a passada atual
         for (int i = 0; i < 20; i++) {
-            sprintf(nome, "fita_%d.dat", i + in_offset);
+            sprintf(nome, "fita_%d.bin", i + in_offset);
             fitas[i + in_offset] = fopen(nome, "rb");
 
-            sprintf(nome, "fita_%d.dat", i + out_offset);
+            sprintf(nome, "fita_%d.bin", i + out_offset);
             fitas[i + out_offset] = fopen(nome, "wb");
         }
 
@@ -189,13 +189,13 @@ void intercalacao_balanceada_interna(int quantidade, int situacao, int print_fla
     if (print_flag) {
         // A fita que contém o arquivo 100% ordenado é a Fita 0 do lado em que ocorreu a última escrita
         int arquivo_final = (num_blocos <= 1 && direcao == 0) ? 0 : ((1 - direcao) == 0 ? 20 : 0);
-        sprintf(nome, "fita_%d.dat", arquivo_final);
+        sprintf(nome, "fita_%d.bin", arquivo_final);
         
         FILE *arq_final = fopen(nome, "rb");
         if (arq_final) {
             printf("\n--- REGISTOS APOS A ORDENACAO ---\n");
             Aluno a;
-            for (int i = 0; i < (quantidade > 10 ? 10 : quantidade); i++) {
+            for (int i = 0; i < (quantidade > 100 ? 100 : quantidade); i++) {
                 if (fread(&a, sizeof(Aluno), 1, arq_final) == 1) {
                     printf("Inscricao: %08ld | Nota: %5.1f\n", a.inscricao, a.nota);
                 }
