@@ -2,24 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// --- Funções de Comparação para a Preparação ---
-int comparar_notas_crescente(const void *a, const void *b) {
-    float notaA = ((Aluno*)a)->nota;
-    float notaB = ((Aluno*)b)->nota;
-    if (notaA < notaB) return -1;
-    if (notaA > notaB) return 1;
-    return 0;
-}
-
-int comparar_notas_decrescente(const void *a, const void *b) {
-    float notaA = ((Aluno*)a)->nota;
-    float notaB = ((Aluno*)b)->nota;
-    if (notaA > notaB) return -1;
-    if (notaA < notaB) return 1;
-    return 0;
-}
-
-// --- Funções Auxiliares de Leitura e Escrita ---
+// --- Funções Auxiliares de Leitura e Escrita (TXT mantidas caso precises noutro local) ---
 
 void extrair_campo(const char *linha, int inicio, int tamanho, char *destino) {
     if (strlen(linha) < inicio + tamanho) {
@@ -35,6 +18,8 @@ int ler_aluno_txt(FILE *arquivo, Aluno *aluno) {
     char buffer[55];
 
     if (fgets(linha, sizeof(linha), arquivo) == NULL) return 0;
+    
+    if (strlen(linha) < 50) return ler_aluno_txt(arquivo, aluno); 
 
     extrair_campo(linha, 0, 8, buffer);
     aluno->inscricao = atol(buffer);
@@ -49,6 +34,8 @@ int ler_aluno_txt(FILE *arquivo, Aluno *aluno) {
     return 1;
 }
 
+// --- Funções de Manipulação Binária para as Métricas ---
+
 void ler_aluno_bin(FILE *arq, int pos, Aluno *a) {
     fseek(arq, pos * sizeof(Aluno), SEEK_SET);
     fread(a, sizeof(Aluno), 1, arq);
@@ -61,47 +48,57 @@ void escrever_aluno_bin(FILE *arq, int pos, Aluno *a) {
     metricas_atuais.transferencias_escrita++;
 }
 
-// --- Geração do Ambiente de Teste ---
+// --- Geração do Ambiente de Teste (Cópia Direta de Bloco Binário) ---
 
-// Prepara o ficheiro de trabalho. NÃO CONTA nas métricas de ordenação.
 void gerar_arquivo_trabalho(int quantidade, int situacao) {
-    FILE *arq_txt = fopen("PROVAO.TXT", "r");
-    FILE *arq_bin = fopen("dados.dat", "wb");
-    
-    if (!arq_txt || !arq_bin) {
-        printf("Erro ao criar ficheiro de trabalho inicial.\n");
-        exit(1);
-    }
+    char nome_arquivo[50];
 
-    // Aloca memória para carregar todos os alunos pedidos de uma vez
-    Aluno *alunos = (Aluno *)malloc(quantidade * sizeof(Aluno));
-    if (alunos == NULL) {
-        printf("Erro de alocacao de memoria na preparacao do ficheiro!\n");
-        exit(1);
-    }
-
-    // Lê os registos do ficheiro de texto
-    int lidos = 0;
-    while (lidos < quantidade && ler_aluno_txt(arq_txt, &alunos[lidos])) {
-        lidos++;
-    }
-
-    // Aplica a pré-ordenação se o utilizador pediu Situação 1 ou 2
+    // 1. Define qual ficheiro binário abrir com base na situação
     if (situacao == 1) {
-        printf("A pre-ordenar ambiente de teste: Situacao 1 (Crescente)...\n");
-        qsort(alunos, lidos, sizeof(Aluno), comparar_notas_crescente);
+        strcpy(nome_arquivo, "provao_crescente.bin");
+        printf("A extrair dados do arquivo: %s...\n", nome_arquivo);
     } else if (situacao == 2) {
-        printf("A pre-ordenar ambiente de teste: Situacao 2 (Decrescente)...\n");
-        qsort(alunos, lidos, sizeof(Aluno), comparar_notas_decrescente);
+        strcpy(nome_arquivo, "provao_decrescente.bin");
+        printf("A extrair dados do arquivo: %s...\n", nome_arquivo);
     } else {
-        printf("A preparar ambiente de teste: Situacao 3 (Desordenado)...\n");
+        strcpy(nome_arquivo, "provao_desordenado.bin"); 
+        printf("A extrair dados do arquivo: %s...\n", nome_arquivo);
     }
 
-    // Grava o vetor preparado no ficheiro binário temporário (dados.dat)
-    fwrite(alunos, sizeof(Aluno), lidos, arq_bin);
+    FILE *arq_fonte = fopen(nome_arquivo, "rb");
+    FILE *arq_bin = fopen("dados.bin", "wb");
+    
+    if (!arq_fonte) {
+        printf("Erro Critico: O arquivo '%s' nao foi encontrado na pasta!\n", nome_arquivo);
+        exit(1);
+    }
+    if (!arq_bin) {
+        printf("Erro ao criar o ficheiro temporario dados.bin\n");
+        fclose(arq_fonte);
+        exit(1);
+    }
 
-    // Limpa a memória e fecha os ficheiros
-    free(alunos);
-    fclose(arq_txt);
+    // 2. Aloca memória para transferir os dados de uma só vez (muito mais rápido)
+    Aluno *buffer = (Aluno *)malloc(quantidade * sizeof(Aluno));
+    if (!buffer) {
+        printf("Erro de alocacao de memoria para a transferencia.\n");
+        fclose(arq_fonte);
+        fclose(arq_bin);
+        exit(1);
+    }
+
+    // 3. Lê exatamente a quantidade pedida do arquivo fonte e escreve no dados.bin
+    int lidos = fread(buffer, sizeof(Aluno), quantidade, arq_fonte);
+    fwrite(buffer, sizeof(Aluno), lidos, arq_bin);
+
+    // 4. Limpa a casa
+    free(buffer);
+    fclose(arq_fonte);
     fclose(arq_bin);
+    
+    if (lidos < quantidade) {
+        printf("Aviso: Foram pedidos %d registos, mas o arquivo so tinha %d.\n", quantidade, lidos);
+    } else {
+        printf("Arquivo de trabalho 'dados.bin' pronto com %d registros.\n", lidos);
+    }
 }
