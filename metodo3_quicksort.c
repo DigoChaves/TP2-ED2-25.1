@@ -51,16 +51,16 @@ void quicksort_externo_rec(FILE *arq, int esq, int dir) {
 }
 
 void quicksort_externo(int quantidade, int situacao, int print_flag) {
-    FILE *arq_bin = fopen("dados.dat", "r+b");
+    FILE *arq_bin = fopen("dados.bin", "r+b");
     if (!arq_bin) {
-        printf("Erro ao abrir dados.dat no Quicksort.\n");
+        printf("Erro ao abrir dados.bin no Quicksort.\n");
         return;
     }
 
     if (print_flag) {
         printf("\n--- REGISTOS ANTES DA ORDENACAO ---\n");
         Aluno a;
-        for (int i = 0; i < (quantidade > 10 ? 10 : quantidade); i++) {
+        for (int i = 0; i < (quantidade > 100 ? 100 : quantidade); i++) {
             ler_aluno_bin(arq_bin, i, &a);
             printf("Inscricao: %08ld | Nota: %5.1f\n", a.inscricao, a.nota);
         }
@@ -77,7 +77,7 @@ void quicksort_externo(int quantidade, int situacao, int print_flag) {
     if (print_flag) {
         printf("\n--- REGISTOS APOS A ORDENACAO ---\n");
         Aluno a;
-        for (int i = 0; i < (quantidade > 10 ? 10 : quantidade); i++) {
+        for (int i = 0; i < (quantidade > 100 ? 100 : quantidade); i++) {
             ler_aluno_bin(arq_bin, i, &a);
             printf("Inscricao: %08ld | Nota: %5.1f\n", a.inscricao, a.nota);
         }
